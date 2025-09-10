@@ -2,6 +2,8 @@
 
 A responsive web application that allows users to search for item prices and shipping to Hong Kong across multiple e-commerce platforms.
 
+🚀 **Live Demo**: [https://lizewkn.github.io/priceright](https://lizewkn.github.io/priceright)
+
 ![PriceRight Homepage](https://github.com/user-attachments/assets/d3c5cb22-a838-40f5-a295-381a40f60199)
 
 ## Features
@@ -37,6 +39,22 @@ A responsive web application that allows users to search for item prices and shi
 - **HTTP Client**: Axios for API requests
 - **Testing**: Jest and React Testing Library
 - **Build Tool**: Create React App
+
+## Deployment
+
+This app is automatically deployed to GitHub Pages using GitHub Actions. Every push to the main branch triggers a new deployment.
+
+- **Live URL**: [https://lizewkn.github.io/priceright](https://lizewkn.github.io/priceright)
+- **Auto-deployment**: Configured via `.github/workflows/deploy.yml`
+
+### Manual Deployment
+
+To build and deploy manually:
+
+```bash
+npm run build
+# The build folder can then be deployed to any static hosting service
+```
 
 ## Getting Started
 
