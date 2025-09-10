@@ -32,8 +32,8 @@ const PriceComparison: React.FC<PriceComparisonProps> = ({ data, searchQuery }) 
     return totalA - totalB;
   });
 
-  const formatPrice = (price: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
+  const formatPrice = (price: number, currency: string = 'HKD') => {
+    return new Intl.NumberFormat('en-HK', {
       style: 'currency',
       currency: currency,
     }).format(price);
@@ -106,13 +106,15 @@ const PriceComparison: React.FC<PriceComparisonProps> = ({ data, searchQuery }) 
                   />
                 )}
 
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={item.image}
-                  alt={item.title}
-                  sx={{ objectFit: 'cover' }}
-                />
+                {item.image && (
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={item.image}
+                    alt={item.title}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                )}
 
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Stack spacing={2}>
