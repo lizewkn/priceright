@@ -27,7 +27,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ data }) => {
     }));
 
   const formatPrice = (value: number) => {
-    return `$${value.toFixed(2)}`;
+    return new Intl.NumberFormat('en-HK', {
+      style: 'currency',
+      currency: 'HKD',
+    }).format(value);
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
