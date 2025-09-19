@@ -1,5 +1,7 @@
 import { ApiResponse, SearchQuery, ApiPriceData } from './types';
 import imageService from './imageService';
+import googleSearchService from './googleSearchService';
+import webCrawlerService from './webCrawlerService';
 
 // eBay Finding API - this is a public API that can be used for product searches
 class EbayService {
@@ -8,8 +10,17 @@ class EbayService {
   
   async searchProducts(searchQuery: SearchQuery): Promise<ApiResponse> {
     try {
-      // For demo purposes, we'll create realistic eBay-style data
-      // In a real implementation, you would make actual API calls to eBay
+      // First, try to use web crawling to get real data
+      const crawledData = await this.getCrawledEbayData(searchQuery.query);
+      
+      if (crawledData.length > 0) {
+        return {
+          success: true,
+          data: crawledData
+        };
+      }
+      
+      // Fallback to mock data if crawling fails
       const mockEbayData = await this.getMockEbayData(searchQuery.query);
       
       return {
@@ -23,6 +34,31 @@ class EbayService {
         data: [],
         error: 'Failed to fetch eBay data'
       };
+    }
+  }
+
+  // Method to crawl eBay using Google search + web scraping
+  private async getCrawledEbayData(query: string): Promise<ApiPriceData[]> {
+    try {
+      // Search for eBay products using Google
+      const searchResults = await googleSearchService.searchProducts(query, 'ebay.com');
+      
+      if (searchResults.length === 0) {
+        return [];
+      }
+      
+      // Take the first result and crawl the product page
+      const firstResult = searchResults[0];
+      const crawlResult = await webCrawlerService.crawlProductPage(firstResult.url, 'eBay');
+      
+      if (crawlResult) {
+        return [webCrawlerService.convertToApiPriceData(crawlResult)];
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('eBay crawling error:', error);
+      return [];
     }
   }
 
