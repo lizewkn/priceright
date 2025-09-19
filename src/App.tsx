@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import SearchComponent from './components/SearchComponent';
 import PriceComparison from './components/PriceComparison';
+import priceComparisonService from './services/priceComparisonService';
 import './App.css';
 
 const theme = createTheme({
@@ -51,74 +52,16 @@ function App() {
     setSearchQuery(query);
     setIsLoading(true);
     
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockData: PriceData[] = [
-        {
-          id: '1',
-          platform: 'Amazon US',
-          price: 2339.92,
-          currency: 'HKD',
-          shipping: 202.72,
-          shippingToHK: true,
-          url: 'https://amazon.com/example',
-          image: 'https://picsum.photos/400/400?random=1',
-          title: `${query} - Premium Quality`,
-          availability: 'In Stock'
-        },
-        {
-          id: '2',
-          platform: 'eBay',
-          price: 2148.90,
-          currency: 'HKD',
-          shipping: 124.72,
-          shippingToHK: true,
-          url: 'https://ebay.com/example',
-          image: 'https://picsum.photos/400/400?random=2',
-          title: `${query} - Good Condition`,
-          availability: 'In Stock'
-        },
-        {
-          id: '3',
-          platform: 'Target',
-          price: 2496.00,
-          currency: 'HKD',
-          shipping: 0,
-          shippingToHK: false,
-          url: 'https://target.com/example',
-          image: '',
-          title: `${query} - Brand New`,
-          availability: 'Limited Stock'
-        },
-        {
-          id: '4',
-          platform: 'StockX',
-          price: 2223.00,
-          currency: 'HKD',
-          shipping: 234.00,
-          shippingToHK: true,
-          url: 'https://stockx.com/example',
-          image: 'https://picsum.photos/400/400?random=3',
-          title: `${query} - Authenticated`,
-          availability: 'Available'
-        },
-        {
-          id: '5',
-          platform: 'Farfetch',
-          price: 2418.00,
-          currency: 'HKD',
-          shipping: 156.00,
-          shippingToHK: true,
-          url: 'https://farfetch.com/example',
-          image: 'https://picsum.photos/400/400?random=4',
-          title: `${query} - Designer Collection`,
-          availability: 'In Stock'
-        }
-      ];
-      
-      setSearchResults(mockData);
+    try {
+      // Use real API services instead of mock data
+      const results = await priceComparisonService.searchAllPlatforms(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
