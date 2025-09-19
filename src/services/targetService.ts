@@ -1,11 +1,24 @@
 import { ApiResponse, SearchQuery, ApiPriceData } from './types';
 import imageService from './imageService';
+import googleSearchService from './googleSearchService';
+import webCrawlerService from './webCrawlerService';
 
 class TargetService {
   private readonly baseUrl = 'https://api.target.com'; // Target RedSky API exists but requires partnership
   
   async searchProducts(searchQuery: SearchQuery): Promise<ApiResponse> {
     try {
+      // First, try to use web crawling to get real data
+      const crawledData = await this.getCrawledTargetData(searchQuery.query);
+      
+      if (crawledData.length > 0) {
+        return {
+          success: true,
+          data: crawledData
+        };
+      }
+      
+      // Fallback to mock data if crawling fails
       const mockTargetData = await this.getMockTargetData(searchQuery.query);
       
       return {
@@ -19,6 +32,31 @@ class TargetService {
         data: [],
         error: 'Failed to fetch Target data'
       };
+    }
+  }
+
+  // Method to crawl Target using Google search + web scraping
+  private async getCrawledTargetData(query: string): Promise<ApiPriceData[]> {
+    try {
+      // Search for Target products using Google
+      const searchResults = await googleSearchService.searchProducts(query, 'target.com');
+      
+      if (searchResults.length === 0) {
+        return [];
+      }
+      
+      // Take the first result and crawl the product page
+      const firstResult = searchResults[0];
+      const crawlResult = await webCrawlerService.crawlProductPage(firstResult.url, 'Target');
+      
+      if (crawlResult) {
+        return [webCrawlerService.convertToApiPriceData(crawlResult)];
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Target crawling error:', error);
+      return [];
     }
   }
 
