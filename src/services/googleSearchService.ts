@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import directSearchService from './directSearchService';
 
 export interface SearchResult {
   title: string;
@@ -31,8 +32,31 @@ class GoogleSearchService {
       return this.parseSearchResults(response.data);
     } catch (error) {
       console.error('Google search error:', error);
+      
+      // Fallback to direct URLs when Google search fails
+      if (site) {
+        return this.generateDirectUrl(query, site);
+      }
+      
       return [];
     }
+  }
+
+  // Generate direct URL when Google search fails
+  private generateDirectUrl(query: string, site: string): SearchResult[] {
+    const platformName = this.getPlatformName(site);
+    const platformInfo = directSearchService.getPlatformInfo(platformName);
+    
+    if (platformInfo) {
+      const directUrl = platformInfo.searchUrl + encodeURIComponent(query);
+      return [{
+        title: `${query} | ${platformName}`,
+        url: directUrl,
+        snippet: `Direct search for "${query}" on ${platformName}`
+      }];
+    }
+    
+    return [];
   }
 
   private parseSearchResults(html: string): SearchResult[] {
@@ -88,11 +112,22 @@ class GoogleSearchService {
         results[platformName] = siteResults;
       } catch (error) {
         console.error(`Search error for ${site}:`, error);
-        results[this.getPlatformName(site)] = [];
+        
+        // Use direct URL fallback
+        const platformName = this.getPlatformName(site);
+        const directResults = this.generateDirectUrl(query, site);
+        results[platformName] = directResults;
       }
     });
 
     await Promise.all(searchPromises);
+    
+    // If all Google searches failed, use direct URLs for all platforms
+    const hasResults = Object.values(results).some(platformResults => platformResults.length > 0);
+    if (!hasResults) {
+      return directSearchService.generateDirectSearchUrls(query);
+    }
+    
     return results;
   }
 
